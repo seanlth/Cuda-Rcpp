@@ -28,4 +28,8 @@ int* CUDAVectorSub(int* a, int* b, int length);
 int* CUDAVectorDiv(int* a, int* b, int length);
 int* CUDAVectorMul(int* a, int* b, int length);
 
+void CUDAWave(float*** initial, int N, int tLimit);
+
+double* CUDALogLikelihood();
+
 #endif

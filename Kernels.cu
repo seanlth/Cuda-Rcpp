@@ -199,7 +199,7 @@ int* CUDAVectorAdd(int* a, int* b, int length)
 
     
     //call the kernel with N threads
-    vectorAdd<<<800, threadsPerBlock>>>(d_a, d_b);
+    vectorAdd<<<800, threadsPerBlock>>>(d_a, d_b, length);
     
     if (cudaSuccess != cudaGetLastError()) {
         std::cout << "Error calling kernel" << std::endl;
@@ -262,7 +262,7 @@ Matrix CUDAMatrixMul(Matrix h_A, Matrix h_B)
     dim3 threadsPerBlock(1, 1);
     dim3 blocksPerGrid(h_B.columns / threadsPerBlock.x, h_A.rows / threadsPerBlock.y);
     
-    matmul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_result);
+    matrixMul<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_result);
     
     if (cudaSuccess != cudaGetLastError()) {
         std::cout << "Error calling kernel" << std::endl;
@@ -278,6 +278,55 @@ Matrix CUDAMatrixMul(Matrix h_A, Matrix h_B)
     
     return result;
 }
+
+
+__global__ void wave(float*** u, float** temp, int N, int tLimit)
+{
+    
+    int x =
+    
+    for (int t = 0; t < tLimit; t++) {
+        
+        temp[x][y] = 2*u[0][x][y] - u[1][x][y] + 50000*((deltaT/deltaX)*(deltaT/deltaX)*(u[0][x+1][y] - 2*u[0][x][y] + u[0][x-1][y])) + 50000*((deltaT/deltaX)*(deltaT/deltaX)*(u[0][x][y+1] - 2*u[0][x][y] + u[0][x][y-1]));
+        u[1][x][y] = u[0][x][y];
+
+        
+    }
+    
+    
+}
+
+
+
+void CUDAWave(float*** initial, int N, int tLimit)
+{
+    
+    
+    
+    
+}
+
+
+//help
+__global__ void logLikelihood()
+{
+    double numerator = 0.0;
+    double denominator = 0.0;
+    double ins = 0.0;
+    int j=0;
+        // #pragma omp parallel for private(ins, j) reduction(+:numerator, denominator)
+        for (int i=0; i<N; i++) {
+            numerator += d[rel[i]-1]*pow( t[i] - Ti[rel[i]-1] - alpha[rel[i]-1], 2);
+            ins = 0.0;
+            for (j=0; j<K; j++) {
+                ins += exp(-d[j]*pow( t[i] - Ti[j] - alpha[j], 2));
+            }
+            denominator += log(ins);
+        }
+    
+}
+
+
 
 
 

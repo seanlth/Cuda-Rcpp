@@ -11,7 +11,7 @@ int main(int argc, const char* argv[])
         a[i] = arc4random() % 100;
         b[i] = arc4random() % 100;
     }
-
+    
     
     int* r;
     r = CUDAVectorAdd(a, b, N);
