@@ -8,7 +8,7 @@ double* runif(int N)
     double* r = new double[N];
     
     for (unsigned int i = 0; i < N; i++) {
-        r[i] = (arc4random() % d) / d;
+        r[i] = (random() % d) / d;
     }
     return r;
 }
