@@ -341,7 +341,7 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
     
-    printf("Time:  %3.1f ms \n", time);
+    printf("%3.1f\n", time);
     
     return result;
 }
