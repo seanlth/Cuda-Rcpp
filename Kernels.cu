@@ -140,7 +140,7 @@ __global__ void vectorAdd(int* a, int* b, int length)
         return;
     }
     
-    //blockIdx is like the 'i' in the code above
+    //blockIdx is like the 'id' in the code above
     a[id] = a[id] + b[id];
 }
 
@@ -279,29 +279,8 @@ Matrix CUDAMatrixMul(Matrix h_A, Matrix h_B)
     return result;
 }
 
-//__global__ void logLikelihood()
-//{
-//    double numerator = 0.0;
-//    double denominator = 0.0;
-//    double ins = 0.0;
-//    int j=0;
-//        // #pragma omp parallel for private(ins, j) reduction(+:numerator, denominator)
-//        for (int i=0; i<N; i++) {
-//            numerator += d[rel[i]-1]*pow( t[i] - Ti[rel[i]-1] - alpha[rel[i]-1], 2);
-//            ins = 0.0;
-//            for (j=0; j<K; j++) {
-//                ins += exp(-d[j]*pow( t[i] - Ti[j] - alpha[j], 2));
-//            }
-//            denominator += log(ins);
-//        }
-//    
-//}
-
-
 void serialLogLikelihood(double* a, double* b, double* data, unsigned int vector_length, unsigned int data_length, double* result)
 {
-    //double* temp = new double[data_length];
-    
     for (unsigned int i = 0; i < data_length; i++) {
         double sum = 0;
         for (unsigned int j = 0; j < vector_length; j++) {
@@ -312,8 +291,11 @@ void serialLogLikelihood(double* a, double* b, double* data, unsigned int vector
 }
 
 
-double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
+double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
 {
+    double* result = new double[iterations];
+    
+    double tmp[] = {0};
     
     //time
     float time;
@@ -322,15 +304,11 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start, 0);
-
-    double* result = new double[iterations];
-    
-    double tmp[] = {0};
     
     for (unsigned int i = 0; i < iterations; i++) {
         
         double* a_temp = a[i];
-        double* b_temp = a[i];
+        double* b_temp = b[i];
 
         serialLogLikelihood(a_temp, b_temp, data, vector_length, data_length, tmp);
         result[i] = *tmp;
@@ -347,5 +325,84 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
 }
 
 
+__global__ void logLikelihood(double* a, double* b, double* data, unsigned int vector_length, unsigned int data_length, double* result)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    
+    double sum = 0;
+    for (unsigned int j = 0; j < vector_length; j++) {
+        sum += exp(a[j] + b[j]*data[i]);
+    }
+    
+    *result += log(sum);
+}
+
+double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
+{
+    double* d_data; //device pointer for data
+    unsigned int size_of_data = sizeof(double) * data_length;
+    cudaMalloc(&d_data, size_of_data);  //make space in GPU memory for data
+    cudaMemcpy(d_data, data, size_of_data, cudaMemcpyHostToDevice); //copy data in a to GPU memory
+    
+    double* d_a; //device pointers for a and b
+    double* d_b;
+    unsigned int size_of_args = sizeof(double) * vector_length;
+    cudaMalloc(&d_a, size_of_args);  //make space in GPU memory for args
+    cudaMalloc(&d_b, size_of_args);  //make space in GPU memory for args
+
+    double tmp[] = {0};
+    double* d_tmp;
+    cudaMalloc(&d_tmp, sizeof(double) );  //make space in GPU memory for result
+    
+    dim3 threadsPerBlock(32);
+    
+    int round_up = ( data_length + 32 - 1 ) / 32;
+    
+    dim3 blocksPerGrid( round_up );
+
+    double* result = new double[iterations];
+    
+    //time
+    float time;
+    cudaEvent_t start, stop;
+    
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
+    
+    
+    for (unsigned int i = 0; i < iterations; i++) {
+        
+        double* a_temp = a[i];
+        double* b_temp = b[i];
+        
+        cudaMemcpy(d_a, a_temp, size_of_args, cudaMemcpyHostToDevice); //copy 'a' to GPU memory
+        cudaMemcpy(d_b, b_temp, size_of_args, cudaMemcpyHostToDevice); //copy 'b' to GPU memory
+
+        logLikelihood<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_data, vector_length, data_length, d_tmp);
+        
+        cudaMemcpy(tmp, d_tmp, sizeof(double), cudaMemcpyDeviceToHost);
+
+        result[i] = *tmp;
+    }
+    
+    
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    
+    printf("%3.1f\n", time);
+    
+    
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_data);
+    cudaFree(d_tmp);
+
+    
+    cudaDeviceReset();
+    
+    return result;
+}
 
 

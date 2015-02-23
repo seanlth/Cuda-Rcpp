@@ -40,7 +40,6 @@ int main(int argc, const char* argv[])
     for (unsigned int i = 0; i < number_of_iterations; i++) {
         delete [] a[i];
         delete [] b[i];
-        //std::cout << result[i] << std::endl;
     }
     
     delete [] a;
