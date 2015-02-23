@@ -319,7 +319,7 @@ double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, 
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
     
-    printf("Time:  %3.1f ms \n", time);
+    printf("%3.1f\n", time);
     
     return result;
 }
