@@ -1,8 +1,10 @@
 #include <iostream>
+#include <stdlib.h>
 #include "Kernels.h"
 
 double* runif(int N)
 {
+
     int d = 10000;
     
     double* r = new double[N];
