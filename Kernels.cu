@@ -279,53 +279,72 @@ Matrix CUDAMatrixMul(Matrix h_A, Matrix h_B)
     return result;
 }
 
+//__global__ void logLikelihood()
+//{
+//    double numerator = 0.0;
+//    double denominator = 0.0;
+//    double ins = 0.0;
+//    int j=0;
+//        // #pragma omp parallel for private(ins, j) reduction(+:numerator, denominator)
+//        for (int i=0; i<N; i++) {
+//            numerator += d[rel[i]-1]*pow( t[i] - Ti[rel[i]-1] - alpha[rel[i]-1], 2);
+//            ins = 0.0;
+//            for (j=0; j<K; j++) {
+//                ins += exp(-d[j]*pow( t[i] - Ti[j] - alpha[j], 2));
+//            }
+//            denominator += log(ins);
+//        }
+//    
+//}
 
-__global__ void wave(float*** u, float** temp, int N, int tLimit)
+
+void serialLogLikelihood(double* a, double* b, double* data, unsigned int vector_length, unsigned int data_length, double* result)
+{
+    //double* temp = new double[data_length];
+    
+    for (unsigned int i = 0; i < data_length; i++) {
+        double sum = 0;
+        for (unsigned int j = 0; j < vector_length; j++) {
+            sum += exp(a[j] + b[j]*data[i]);
+        }
+        *result += log(sum);
+    }
+}
+
+
+double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
 {
     
-    int x =
+    //time
+    float time;
+    cudaEvent_t start, stop;
     
-    for (int t = 0; t < tLimit; t++) {
-        
-        temp[x][y] = 2*u[0][x][y] - u[1][x][y] + 50000*((deltaT/deltaX)*(deltaT/deltaX)*(u[0][x+1][y] - 2*u[0][x][y] + u[0][x-1][y])) + 50000*((deltaT/deltaX)*(deltaT/deltaX)*(u[0][x][y+1] - 2*u[0][x][y] + u[0][x][y-1]));
-        u[1][x][y] = u[0][x][y];
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
 
+    double* result = new double[iterations];
+    
+    double tmp[] = {0};
+    
+    for (unsigned int i = 0; i < iterations; i++) {
         
+        double* a_temp = a[i];
+        double* b_temp = a[i];
+
+        serialLogLikelihood(a_temp, b_temp, data, vector_length, data_length, tmp);
+        result[i] = *tmp;
     }
     
     
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&time, start, stop);
+    
+    printf("Time:  %3.1f ms \n", time);
+    
+    return result;
 }
-
-
-
-void CUDAWave(float*** initial, int N, int tLimit)
-{
-    
-    
-    
-    
-}
-
-
-//help
-__global__ void logLikelihood()
-{
-    double numerator = 0.0;
-    double denominator = 0.0;
-    double ins = 0.0;
-    int j=0;
-        // #pragma omp parallel for private(ins, j) reduction(+:numerator, denominator)
-        for (int i=0; i<N; i++) {
-            numerator += d[rel[i]-1]*pow( t[i] - Ti[rel[i]-1] - alpha[rel[i]-1], 2);
-            ins = 0.0;
-            for (j=0; j<K; j++) {
-                ins += exp(-d[j]*pow( t[i] - Ti[j] - alpha[j], 2));
-            }
-            denominator += log(ins);
-        }
-    
-}
-
 
 
 
