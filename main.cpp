@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 #include "Kernels.h"
 
 double* runif(int N)

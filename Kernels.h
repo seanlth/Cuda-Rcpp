@@ -2,6 +2,7 @@
 #define _Kernels_h
 
 #include <iostream>
+#include <stdio.h>
 
 
 class Matrix {
