@@ -293,10 +293,6 @@ void serialLogLikelihood(double* a, double* b, double* data, unsigned int vector
 
 double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
 {
-    double* result = new double[iterations];
-    
-    double tmp[] = {0};
-    
     //time
     float time;
     cudaEvent_t start, stop;
@@ -304,6 +300,9 @@ double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, 
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start, 0);
+
+    double* result = new double[iterations];
+    double tmp[] = {0};
     
     for (unsigned int i = 0; i < iterations; i++) {
         
@@ -319,7 +318,7 @@ double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, 
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
     
-    //printf("%3.1f\n", time);
+    printf("%3.1f\n", time);
     
     return result;
 }
@@ -339,6 +338,15 @@ __global__ void logLikelihood(double* a, double* b, double* data, unsigned int v
 
 double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
 {
+    //time
+    float time;
+    cudaEvent_t start, stop;
+    
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start, 0);
+
+    
     double* d_data; //device pointer for data
     unsigned int size_of_data = sizeof(double) * data_length;
     cudaMalloc(&d_data, size_of_data);  //make space in GPU memory for data
@@ -362,15 +370,6 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
 
     double* result = new double[iterations];
     
-    //time
-    float time;
-    cudaEvent_t start, stop;
-    
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
-    
-    
     for (unsigned int i = 0; i < iterations; i++) {
         
         double* a_temp = a[i];
@@ -388,21 +387,20 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
         }        
     }
     
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_data);
+    cudaFree(d_tmp);
+    
+    cudaDeviceReset();
+    
+    
     
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
     
     printf("%3.1f\n", time);
-    
-    
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_data);
-    cudaFree(d_tmp);
-
-    
-    cudaDeviceReset();
     
     return result;
 }
