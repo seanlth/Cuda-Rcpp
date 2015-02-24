@@ -392,13 +392,12 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
     cudaFree(d_data);
     cudaFree(d_tmp);
     
-    cudaDeviceReset();
-    
-    
-    
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&time, start, stop);
+    
+    cudaDeviceReset();
+
     
     printf("%3.1f\n", time);
     
