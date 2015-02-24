@@ -124,17 +124,17 @@ double* partition(double* arr, int i, int size)
     return result;
 }
 
-//double* runif(int N)
-//{
-//    int d = 10000;
-//    
-//    double* r = new double[N];
-//    
-//    for (unsigned int i = 0; i < N; i++) {
-//        r[i] = (random() % d) / (double)d;
-//    }
-//    return r;
-//}
+double* runif(int N)
+{
+    int d = 10000;
+    
+    double* r = new double[N];
+    
+    for (unsigned int i = 0; i < N; i++) {
+        r[i] = (random() % d) / (double)d;
+    }
+    return r;
+}
 
 
 int main(int argc, const char* argv[])
@@ -143,35 +143,35 @@ int main(int argc, const char* argv[])
     int vector_length = 22;
     int data_length = 10000;
     
-    //double* data = runif(data_length);
+    double* data = runif(data_length);
     
-    double* data = partition(data_test, 0, data_length);
+    //double* data = partition(data_test, 0, data_length);
     
     double** a = new double*[number_of_iterations];
     double** b = new double*[number_of_iterations];
     
-//    for (unsigned int i = 0; i < number_of_iterations; i++) {
-//        a[i] = runif(vector_length);
-//        b[i] = runif(vector_length);
-//    }
-    
     for (unsigned int i = 0; i < number_of_iterations; i++) {
-        a[i] = partition(a_test, i, vector_length);
-        b[i] = partition(b_test, i, vector_length);
+        a[i] = runif(vector_length);
+        b[i] = runif(vector_length);
     }
+    
+//    for (unsigned int i = 0; i < number_of_iterations; i++) {
+//        a[i] = partition(a_test, i, vector_length);
+//        b[i] = partition(b_test, i, vector_length);
+//    }
     
     double* result = new double[number_of_iterations];
     
     result = CUDALogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
     
-    for (unsigned int i = 0; i < number_of_iterations; i++) {
+//    for (unsigned int i = 0; i < number_of_iterations; i++) {
 //        std::cout << result[i] << std::endl;
 //        std::cout << results_test[i] << std::endl;
-
-        if ( fabs( result[i] - results_test[i] ) < 0.01) {
-            std::cout << "Error" << std::endl;
-        }
-    }
+//
+//        if ( fabs( result[i] - results_test[i] ) < 0.01) {
+//            std::cout << "Error" << std::endl;
+//        }
+//    }
     
     for (unsigned int i = 0; i < number_of_iterations; i++) {
         delete [] a[i];
