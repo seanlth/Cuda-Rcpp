@@ -176,6 +176,8 @@ double* runif(int N)
 
 int main(int argc, const char* argv[])
 {
+    srand ( time(NULL) );
+
     int number_of_iterations = atoi( argv[1] );
     int vector_length = 22;
     int data_length = 10000;
@@ -187,6 +189,7 @@ int main(int argc, const char* argv[])
     double** a = new double*[number_of_iterations];
     double** b = new double*[number_of_iterations];
     
+    
     for (unsigned int i = 0; i < number_of_iterations; i++) {
         a[i] = runif(vector_length);
         b[i] = runif(vector_length);
@@ -197,18 +200,18 @@ int main(int argc, const char* argv[])
 //        b[i] = partition(b_test, i, vector_length);
 //    }
     
-    double* result = new double[number_of_iterations];
     
-    result = CUDALogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
-    
-//    for (unsigned int i = 0; i < number_of_iterations; i++) {
-//        std::cout << result[i] << std::endl;
-//        std::cout << results_test[i] << std::endl;
-//
-//        if ( fabs( result[i] - results_test[i] ) < 0.01) {
-//            std::cout << "Error" << std::endl;
-//        }
-//    }
+    double* result_serial = new double[number_of_iterations];
+    double* result_parallel = new double[number_of_iterations];
+
+    result_serial = SERIALLogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
+    result_parallel = CUDALogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
+
+    for (unsigned int i = 0; i < number_of_iterations; i++) {
+        if ( fabs( result_serial[i] - result_parallel[i] ) > 0.01) {
+            std::cout << "Error" << std::endl;
+        }
+    }
     
     for (unsigned int i = 0; i < number_of_iterations; i++) {
         delete [] a[i];
@@ -219,8 +222,9 @@ int main(int argc, const char* argv[])
     delete [] b;
 
     delete [] data;
-    delete [] result;
-    
+    delete [] result_serial;
+    delete [] result_parallel;
+
     
     return 0;
 }

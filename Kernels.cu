@@ -302,6 +302,8 @@ double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, 
     cudaEventRecord(start, 0);
 
     double* result = new double[iterations];
+    std::fill(result, result+iterations, 0);
+    
     double tmp[] = {0};
     
     for (unsigned int i = 0; i < iterations; i++) {
@@ -311,6 +313,7 @@ double* SERIALLogLikelihood(double* data, unsigned int data_length, double** a, 
 
         serialLogLikelihood(a_temp, b_temp, data, vector_length, data_length, tmp);
         result[i] = *tmp;
+        *tmp = 0;
     }
     
     
@@ -369,6 +372,7 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
     dim3 blocksPerGrid( round_up );
 
     double* result = new double[iterations];
+    std::fill(result, result+iterations, 0);
     
     for (unsigned int i = 0; i < iterations; i++) {
         
@@ -382,9 +386,10 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
         
         cudaMemcpy(tmp, d_tmp, sizeof(double) * data_length, cudaMemcpyDeviceToHost);
 
+        //replace for CUDA horizontal sum
         for (unsigned int j = 0; j < data_length; j++) {
             result[i] += tmp[j];
-        }        
+        }
     }
     
     cudaFree(d_a);
