@@ -333,7 +333,10 @@ __global__ void logLikelihood(double* a, double* b, double* data, unsigned int v
     
     double sum = 0;
     for (unsigned int j = 0; j < vector_length; j++) {
-        sum += exp(a[j] + b[j]*data[i]);
+		// NEED TO CHECK IF CORRECT
+		// is inline with the given function
+		// only takes last iterations result
+        sum = exp(a[j] + b[j]*data[i]);
     }
     result[i] = log(sum);
     
@@ -342,12 +345,12 @@ __global__ void logLikelihood(double* a, double* b, double* data, unsigned int v
 double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
 {
     //time
-    float time;
-    cudaEvent_t start, stop;
+    //float time;
+    //cudaEvent_t start, stop;
     
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-    cudaEventRecord(start, 0);
+    //cudaEventCreate(&start);
+    //cudaEventCreate(&stop);
+    //cudaEventRecord(start, 0);
 
     
     double* d_data; //device pointer for data
@@ -397,14 +400,14 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
     cudaFree(d_data);
     cudaFree(d_tmp);
     
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&time, start, stop);
+    //cudaEventRecord(stop, 0);
+    //cudaEventSynchronize(stop);
+    //cudaEventElapsedTime(&time, start, stop);
     
     cudaDeviceReset();
 
     
-    printf("%3.1f\n", time);
+    //printf("%3.1f\n", time);
     
     return result;
 }
