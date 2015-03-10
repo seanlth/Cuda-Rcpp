@@ -200,7 +200,6 @@ int main(int argc, const char* argv[])
 //        b[i] = partition(b_test, i, vector_length);
 //    }
     
-    
     double* result_serial = new double[number_of_iterations];
     double* result_parallel = new double[number_of_iterations];
 
