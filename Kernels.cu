@@ -333,12 +333,20 @@ __global__ void logLikelihood(double* a, double* b, double* data, unsigned int v
     
     double sum = 0;
     for (unsigned int j = 0; j < vector_length; j++) {
-		// NEED TO CHECK IF CORRECT
-		// is inline with the given function
-		// only takes last iterations result
-        sum = exp(a[j] + b[j]*data[i]);
+        sum += exp(a[j] + b[j]*data[i]);
     }
     result[i] = log(sum);
+}
+
+__global__ void logLikelihood2(double* a, double* b, double* data, unsigned int vector_length, unsigned int data_length, double* result)
+{
+    
+    double sum = 0;
+    for (unsigned int j = 0; j < data_length; j++) {
+        sum += data[j];
+    }
+    
+    return -b * sum + N * (log(a) + log(b)) - a * (1 - exp(-b * t[[N]]))
     
 }
 
