@@ -180,7 +180,7 @@ int main(int argc, const char* argv[])
 
     int number_of_iterations = atoi( argv[1] );
     int vector_length = 22;
-    int data_length = 10000;
+    int data_length = 100;
     
     double* data = runif(data_length);
     
@@ -203,14 +203,15 @@ int main(int argc, const char* argv[])
     double* result_serial = new double[number_of_iterations];
     double* result_parallel = new double[number_of_iterations];
 
-    result_serial = SERIALLogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
+    //result_serial = SERIALLogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
     result_parallel = CUDALogLikelihood(data, data_length, a, b, vector_length, number_of_iterations);
 
-    for (unsigned int i = 0; i < number_of_iterations; i++) {
-        if ( fabs( result_serial[i] - result_parallel[i] ) > 0.01) {
-            std::cout << "Error" << std::endl;
-        }
-    }
+//    for (unsigned int i = 0; i < number_of_iterations; i++) {
+//        if ( fabs( result_serial[i] - result_parallel[i] ) > 0.01) {
+//            std::cout << "Error" << std::endl;
+//        }
+//    }
+    
     
     for (unsigned int i = 0; i < number_of_iterations; i++) {
         delete [] a[i];

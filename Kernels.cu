@@ -340,14 +340,14 @@ __global__ void logLikelihood(double* a, double* b, double* data, unsigned int v
 
 __global__ void logLikelihood2(double* a, double* b, double* data, unsigned int vector_length, unsigned int data_length, double* result)
 {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
     
     double sum = 0;
     for (unsigned int j = 0; j < data_length; j++) {
         sum += data[j];
     }
     
-    return -b * sum + N * (log(a) + log(b)) - a * (1 - exp(-b * t[[N]]))
-    
+    result[i] = -b[i] * sum + data_length * (log(a[i]) + log(b[i])) - a[i] * (1 - exp(-b[i] * data[data_length-1]));
 }
 
 double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
@@ -393,7 +393,7 @@ double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, do
         cudaMemcpy(d_a, a_temp, size_of_args, cudaMemcpyHostToDevice); //copy 'a' to GPU memory
         cudaMemcpy(d_b, b_temp, size_of_args, cudaMemcpyHostToDevice); //copy 'b' to GPU memory
 
-        logLikelihood<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_data, vector_length, data_length, d_tmp);
+        logLikelihood2<<<blocksPerGrid, threadsPerBlock>>>(d_a, d_b, d_data, vector_length, data_length, d_tmp);
         
         cudaMemcpy(tmp, d_tmp, sizeof(double) * data_length, cudaMemcpyDeviceToHost);
 
