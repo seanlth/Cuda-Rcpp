@@ -17,16 +17,18 @@ fn1 <- function(a, b, t) {
   nv <- length(a)
   stopifnot(length(a)==length(b))
   TMP <- vector(mode='numeric', N)
+  tmp <- vector(mode='numeric', nv)
   for (j in 1:N) {
     for (k in 1:nv)
-      tmp.k <- exp(a[[k]] + b[[k]]*t[[j]])
-    TMP[[j]] <- log(sum(tmp.k))
+      tmp[[k]] <- exp(a[[k]] + b[[k]]*t[[j]])
+    TMP[[j]] <- log(sum(tmp))
   }
   sum(TMP)
 }
 
-ITER <- 10000	# The number of iterations to run
+ITER <- 100 	# The number of iterations to run
 NVER <- 100 	# fake version vector length
+DLEN <- 10    # length of fake data
 
 cat('Number of Iterations: ', ITER, '\n')
 cat('Vector size: ', NVER, '\n')
@@ -35,8 +37,9 @@ cat('Vector size: ', NVER, '\n')
 a <- vector(mode='list', length=ITER)
 b <- vector(mode='list', length=ITER)
 
-set.seed(123) 		# to make sure the fake data is the same each time!
-data <- runif(10) 	# fake data
+set.seed(123) 		    # to make sure the fake data is the same each time!
+data <- runif(DLEN) 	# fake data
+
 # Used to hold the results from the R implementation
 RES <- vector(mode='numeric', length=ITER)	 
 # Used to hold the results from the CUDA implementation

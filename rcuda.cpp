@@ -46,7 +46,6 @@ RcppExport SEXP cudaLog(SEXP a1, SEXP b1, SEXP t1, SEXP numIter)
   double ** cB = listTo2dDouble(b);
 
   // Call the CUDA implementation of the log-likelihood function from Kernels.h with signature:
-  // double* CUDALogLikelihood(double* data, unsigned int data_length, double** a, double** b, unsigned int vector_length, unsigned int iterations)
   double* res = CUDALogLikelihood(data.begin(), data.size(), cA, cB, len, iterations);
   
   // Convert the resultant double array to a double vector
