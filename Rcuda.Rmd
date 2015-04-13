@@ -4,7 +4,7 @@ output: html_document
 summary: Demonstrating the execution of CUDA code from within R
 ---
 
-This example will walkthroigh the steps needed in order to execute code on a Nvidia GPU using the CUDA api from within R.
+This example will walk through the steps needed in order to execute code on a Nvidia GPU using the CUDA api from within R.
 
 Below is the function that will be used as an example of using CUDA.In reality this function would be executed with a loop.
 
